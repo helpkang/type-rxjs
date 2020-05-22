@@ -1,0 +1,43 @@
+{
+  "name": "type-rxjs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "pre-commit-msg": "echo '\n==== Pre-commit checks... ==== \n'&& exit 0",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "clean": "rimraf dist/",
+    "start": "ts-node src/",
+    "start:dist": "node dist/",
+    "build": "tsc",
+    "prebuild": "npm run clean",
+    "postbuild": "node scripts/postbuild.js"
+  },
+  "bin": {
+    "type-rxjs": "./dist/index.js",
+    "type-rxjs-dev": "./src/index.ts"
+  },
+  "pre-commit": [
+    "pre-commit-msg",
+    "lint",
+    "build",
+    "clean"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^5.1.0",
+    "rxjs": "^6.5.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.4",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^3.0.2",
+    "ts-node": "^8.10.1",
+    "tslint": "^6.1.2",
+    "tslint-eslint-rules": "^5.4.0",
+    "typescript": "^3.9.3"
+  }
+}
