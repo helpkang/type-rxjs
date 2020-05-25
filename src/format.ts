@@ -42,10 +42,3 @@ export function getFormatDate() {
 
   return minutes + ':' + seconds + '.' + miliseconds;
 }
-
-/**
- * 최초 null data 생성
- */
-export function getNull(): Message {
-  return { data: null, c: Date.now(), t: getFormatDate() };
-}
