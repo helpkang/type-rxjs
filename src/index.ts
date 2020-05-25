@@ -30,6 +30,10 @@ import {
 
 import { getFormatDate, Message } from './format'
 
+export {
+  getFormatDate, Message
+};
+
 
 export interface MessageCreateOptions {
   log?: boolean;
@@ -45,6 +49,12 @@ export class MssageCreator {
 
   /**
    * 메시지 처리 생성자
+   * sample :
+   * const mc = MssageCreator.create({
+   * log: true,
+   * interMessageTime: 200,
+   * deleteMessageTime: 300,
+   * })
    * @param test test 용으로 생성할지 여부
    */
   static create(options: MessageCreateOptions): MssageCreator {
@@ -59,20 +69,18 @@ export class MssageCreator {
 
   private sb: Subject<Message | null>;
 
-  private _message$: Observable<any>;
+  private _message$: Observable<Message | null>;
 
   get message$(): Observable<Message | null> {
     return this._message$;
   }
 
   private constructor(options: MessageCreateOptions) {
-    this.sb = new Subject();
+    this.sb = new Subject<Message | null>();
 
     this._message$ = this.sb.pipe(
       //pair를 위해서 더미 데이터 생성
       startWith(null),
-      //data에 시간 정보를 생성해서 넣음
-      map((data: any): Message => ({ data, c: Date.now(), t: getFormatDate() })),
     )
       .pipe(
         pairwise(),
@@ -82,7 +90,7 @@ export class MssageCreator {
         debounce(([p, c]) => {
 
           //처음 시작이거나 긴시간 동안 데이터가 없는 경우
-          if (!p.data || c.c - p.c > options.interMessageTime) {
+          if (!p || c.c - p.c > options.interMessageTime) {
             return of(1);
           }
 
@@ -103,56 +111,12 @@ export class MssageCreator {
         //필요 없는것 같지만 혹시나 해서 넣어 줌
         distinctUntilChanged(),
         share(),
-      )
+      ) as Observable<Message>
+
   }
 
   public sendMessage(message: any) {
-    if (!this.sb) throw Error('test mode is not avalible function sendMessage!');
-    this.sb.next(message);
+    //data에 시간 정보를 생성해서 넣음
+    this.sb.next(({ data: message, c: Date.now(), t: getFormatDate() }));
   }
 }
-
-const mc = MssageCreator.create({
-  log: true,
-  interMessageTime: 200,
-  deleteMessageTime: 300,
-
-})
-
-mc.message$
-  .pipe(
-    filter((v: Message) => {
-      const b = !v || !v['data'] || v['data'] % 2 === 1;
-      return b;
-    }),
-  ).subscribe((val: Message | null) => {
-    // tslint:disable-next-line: no-console
-    console.log('receive:', getFormatDate(), val);
-  });
-
-setTimeout(() =>
-  mc.message$.pipe(
-    filter((v: Message) => {
-      const b = !v || !v['data'] || v['data'] % 2 === 0;
-      return b;
-    }),
-  )
-    .subscribe((val: Message) => {
-      // tslint:disable-next-line: no-console
-      console.log('receive2:', getFormatDate(), val);
-    }), 3000);
-
-range(1, 41)
-  .pipe(
-    //random data 생성
-    concatMap((i) => {
-      //마지막 데이터를 보기 위해서 무한정 긴 시간을 기다림
-      if (i > 40) return of(i).pipe(delay(20000000));
-      //random data 
-      return of(i).pipe(delay(Math.random() * 400));
-    }),
-  )
-
-  .subscribe((v) => {
-    mc.sendMessage(v);
-  })
