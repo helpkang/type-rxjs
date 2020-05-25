@@ -27,51 +27,31 @@ import {
   combineAll,
 } from 'rxjs/operators';
 
-const start = Date.now();
+import { getFormatDate, getNull } from './format'
 
-// const clear$ = interval(500).pipe(
-//     mapTo('clear')
-// );
 
-function getFormatDate() {
-  const secnum = Date.now() - start;
-  let minutes: any = Math.floor((secnum % (1000 * 60 * 60)) / (1000 * 60));
-  let seconds: any = Math.floor((secnum % (1000 * 60)) / 1000);
-  let miliseconds: any = secnum % 1000;
-
-  if (minutes < 10) {
-    minutes = '0' + minutes;
-  }
-  if (seconds < 10) {
-    seconds = '0' + seconds;
-  }
-  if (miliseconds < 10) {
-    miliseconds = '00' + miliseconds;
-  } else if (miliseconds < 100) {
-    miliseconds = '0' + miliseconds;
-  }
-
-  return minutes + ':' + seconds + '.' + miliseconds;
-}
-
-range(1, 20)
+range(1, 41)
   .pipe(
-    concatMap((i) => of(i).pipe(delay(50 + Math.random() * 2000))),
-    map((i) => ({ i, c: Date.now(), t: getFormatDate() })),
+    concatMap((i) => {
+      if (i > 40) return of(i).pipe(delay(20000000));
+      return of(i).pipe(delay(Math.random() * 400));
+    }),
+
   )
-  .pipe(startWith(null))
+  .pipe(
+    map((data) => ({ data, c: Date.now(), t: getFormatDate() })),
+    startWith((getNull())),
+  )
   .pipe(
     pairwise(),
-    // tap(console.log),
+    tap(([p, c]) => console.log(c)),
     debounce(([p, c]) =>
-      !p || !c ? of(1) : c['c'] - p['c'] > 200 ? of(1) : interval(1000),
+      !p.data || !c.data ? of(1) : c.c - p.c > 100 ? of(1) : interval(100),
     ),
     map(([_, value]) => value),
-    // map(([_, value]) => ({ ...value, l: Date.now() })),
     switchMap((value) => of(value, null)),
-    switchMap((value) => (value ? of(value) : of(value).pipe(delay(1000)))),
+    switchMap((value) => (value ? of(value) : of(value).pipe(delay(300)))),
   )
-  .pipe()
   .subscribe((val) => {
     // tslint:disable-next-line: no-console
     console.log('receive:', getFormatDate(), val);
