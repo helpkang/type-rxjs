@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pre-commit-msg": "echo '\n==== Pre-commit checks... ==== \n'&& exit 0",
-    "test": "ts-node src/test",
+    "test": "ts-node src/newMsg",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "clean": "rimraf dist/",
     "start": "ts-node src/",
