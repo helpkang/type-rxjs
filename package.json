@@ -8,7 +8,7 @@
     "test": "ts-node src/newMsg",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "clean": "rimraf dist/",
-    "start": "ts-node src/",
+    "start": "ts-node",
     "start:dist": "node dist/",
     "build": "tsc",
     "prebuild": "npm run clean",
